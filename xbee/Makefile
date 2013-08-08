@@ -7,3 +7,6 @@ all: learnlibxbee.x
 learnlibxbee.x: learnlibxbee.c
 	$(CC) $(CFLAGS) $(LDFLAGS) learnlibxbee.c -o learnlibxbee.x
 
+clean:
+	rm -f *.o *.x
+
