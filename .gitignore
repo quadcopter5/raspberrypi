@@ -12,6 +12,9 @@
 *.la
 *.a
 
+# Linux executables (some)
+*.x
+
 # Windows binaries
 *.exe
 *.dll

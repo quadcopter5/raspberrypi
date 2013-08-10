@@ -7,8 +7,8 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <string.h>
 
-#include "string.h"
 #include "gpio.h"
 
 // Size of page
