@@ -1,11 +1,14 @@
 CC = gcc
 CFLAGS = -g
-LDFLAGS = -lpthread -lrt -lxbee
+LDFLAGS = 
 
-all: learnlibxbee.x
+all: usbxbee.x twoway.x
 
-learnlibxbee.x: learnlibxbee.c
-	$(CC) $(CFLAGS) $(LDFLAGS) learnlibxbee.c -o learnlibxbee.x
+usbxbee.x: usbxbee.c
+	$(CC) $(CFLAGS) $(LDFLAGS) usbxbee.c -o usbxbee.x
+
+twoway.x: twoway.c
+	$(CC) $(CFLAGS) $(LDFLAGS) twoway.c -o twoway.x
 
 clean:
 	rm -f *.o *.x
