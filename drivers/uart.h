@@ -105,9 +105,9 @@ int uart_readUBE32(uint32_t *i);
 /**
 	Get the size of the input queue buffer.
 
-	Returns the current number of bytes remaining in the input queue buffer.
-	These are bytes that have been received and stored but not yet read by
-	the application.
+	Returns the current number of bytes remaining in the input queue buffer,
+	or -1 if UART has not been initialized. These are bytes that have been
+	received and stored but not yet read by the application.
 */
 int uart_getInputQueueSize();
 

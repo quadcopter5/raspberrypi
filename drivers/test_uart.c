@@ -17,26 +17,47 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-	int done = 0;
-	char buffer[50];
+	int  done = 0,
+	     bytes;
+	char buffer[51],
+	     *pos;
+
 	while (!done) {
-		printf("Tx: ");
-		fflush(stdout);
-		fgets(buffer, 50, stdin);
-
-		int length = strlen(buffer);
-		if (buffer[length - 1] == '\n') {
-			--length;
-			buffer[length] = '\0';
+		// Receive
+		bytes = uart_read(buffer, 50);
+		buffer[bytes] = '\0';
+		if (bytes > 0) {
+			// Convert CR to LF
+			char *pos;
+			while ((pos = strchr(buffer, '\r')) != NULL)
+				*pos = '\n';
+			printf("Rx: %s\n", buffer);
 		}
+		bytes = uart_getInputQueueSize();
+		printf("(%d bytes in queue)\n", bytes);
 
-		uart_write(buffer, length);
 		if (strchr(buffer, '`') != NULL)
 			done = 1;
+		else {
+			// Transmit
+			printf("Tx: ");
+			int gotten = 0;
+			while (fgets(buffer, 50, stdin) == NULL);
+
+			bytes = strlen(buffer);
+			if (!(bytes == 1 && buffer[0] == '\n')) {
+				while ((pos = strchr(buffer, '\n')) != NULL)
+					*pos = '\r';
+
+				uart_write(buffer, bytes);
+				if (strchr(buffer, '`') != NULL)
+					done = 1;
+			}
+		}
 	}
 
+	/*
 	// Read whenever RX FIFO is not empty, until a ` is read
-	buffer[0] = 0;
 	done = 0;
 	int bytes;
 
@@ -54,6 +75,7 @@ int main(int argc, char **argv) {
 				done = 1;
 		}
 	}
+	*/
 
 	if (!uart_deinit()) {
 		fprintf(stderr, "uart_deinit(): %s\n", uart_getLastError());

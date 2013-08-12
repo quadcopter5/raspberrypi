@@ -14,59 +14,23 @@
 #include <signal.h>
 
 #include "uart.h"
-
-#define QB_BUFSIZE 4096
-struct QueueBuffer {
-	struct QueueBufferNode {
-		char buffer[QB_BUFSIZE];
-		char *front, *back;
-		struct QueueBufferNode *next;
-	} *head, *tail;
-};
-
-static struct QueueBuffer *queuebuffer = 0;
-
-/**
-	Initialize a QueueBuffer.
-*/
-static void qb_initialize(struct QueueBuffer **qbuf);
-
-/**
-	Free resources used by QueueBuffer.
-*/
-static void qb_free(struct QueueBuffer *qbuf);
-
-/**
-	Add len bytes from the given buffer to the provided QueueBuffer.
-*/
-static void qb_push(struct QueueBuffer *qbuf, const void *buffer, size_t len);
-
-/**
-	Pop the next numbytes off the QueueBuffer into the given buffer.
-	
-	Returns the number of bytes actually popped. This could be less than
-	numbytes if the number of bytes stored in the QueueBuffer is less than
-	numbytes.
-*/
-static int qb_pop(struct QueueBuffer *qbuf, void *buffer, size_t numbytes);
-
-/**
-	Returns the number of bytes currently stored by qbuf.
-*/
-static int qb_getSize(struct QueueBuffer *qbuf);
+#include "queuebuffer.h"
 
 // Internal error handling data
 #define UART_ERRSIZE 128
 static int error = 0;
 static char error_str[UART_ERRSIZE];
 
+static void generateError(const char *str);
+
+// File descriptor to the UART terminal interface
 static int uartfd = -1;
 
-static void generateError(const char *str) {
-	error = 1;
-	strncpy(error_str, str, UART_ERRSIZE);
-}
+// QueueBuffer as an intermediate place to store data as it comes in.
+static struct QueueBuffer *queuebuffer = 0;
 
+// SIgnal handler for SIGIO; called by kernel when IO data becomes
+// available.
 static void sigHandlerIO(int signumber);
 
 int uart_init(int baudrate, UARTParity parity) {
@@ -159,7 +123,7 @@ int uart_init(int baudrate, UARTParity parity) {
 	tcflow(uartfd, TCOON | TCION); // Restart input and output
 	tcflush(uartfd, TCIOFLUSH);    // Flush buffer for clean start
 
-	qb_initialize(queuebuffer);
+	qb_initialize(&queuebuffer);
 
 	return 1;
 }
@@ -169,6 +133,9 @@ int uart_deinit() {
 		generateError("Could not close /dev/ttyAMA0");
 		return 0;
 	}
+
+	qb_free(&queuebuffer);
+
 	return 1;
 }
 
@@ -188,7 +155,17 @@ int uart_read(void *buffer, size_t len) {
 		return 0;
 	}
 
-	return read(uartfd, buffer, len);
+	return qb_pop(queuebuffer, buffer, len);
+//	return read(uartfd, buffer, len);
+}
+
+int uart_getInputQueueSize() {
+	if (!queuebuffer) {
+		generateError("UART has not been initialized");
+		return -1;
+	}
+
+	return qb_getSize(queuebuffer);
 }
 
 char *uart_getLastError() {
@@ -200,86 +177,16 @@ char *uart_getLastError() {
 }
 
 void sigHandlerIO(int signumber) {
-	char buffer[51];
-	int bytes;
-	while ((bytes = read(uartfd, buffer, 50)) > 0) {
-		buffer[bytes] = '\0';
-		printf("%s", buffer);
+	if (queuebuffer) {
+		char buffer[64];
+		int bytes;
+		while ((bytes = read(uartfd, buffer, 64)) > 0)
+			qb_push(queuebuffer, buffer, bytes);
 	}
 }
 
-/**
-	QueueBuffer
-*/
-
-void qb_initialize(struct QueueBuffer **qbuf) {
-	*qbuf = malloc(sizeof(struct QueueBuffer));
-
-	(*qbuf)->head = malloc(sizeof(struct QueueBufferNode));
-	(*qbuf)->tail = (*qbuf)->head;
-
-	(*qbuf)->head->front =
-	(*qbuf)->head->back  = (*qbuf)->head->buffer;
-	(*qbuf)->head->next  = NULL;
-}
-
-void qb_free(struct QueueBuffer **qbuf) {
-	struct QueueBufferNode *current = (*qbuf)->head, temp;
-	while (current != NULL) {
-		temp = current->next;
-		free(current);
-		current = temp;
-	}
-	*qbuf = NULL;
-}
-
-void qb_push(struct QueueBuffer *qbuf, const void *buffer, size_t len) {
-	const char *cbuffer = (const char*)buffer;
-	int i = 0;
-
-	while (i < len) {
-		++qbuf->tail->back;
-
-		// If the current node is full, add a new node to the back
-		if (qbuf->tail->back - qbuf->tali->buffer >= QB_BUFSIZE) {
-			qbuf->tail->next = malloc(sizeof(struct QueueBufferNode));
-			qbuf->tail = qbuf->tail->next;
-
-			qbuf->tail->front = 
-			qbuf->tail->back  = qbuf->tail->buffer;
-		}
-
-		*qbuf->tail->back = cbuffer[i];
-	}
-}
-
-int qb_pop(struct QueueBuffer *qbuf, void *buffer, size_t numbytes) {
-	struct QueueBufferNode *current = qbuf->head;
-	char *cbuffer = (char *)buffer;
-	int i = 0;
-
-	while (i < numbytes) {
-		// Check if the head node is empty
-		if (qbuf->head->front == qbuf->head->back) {
-			if (qbuf->head->next == NULL) {
-				// There is no more data; buffer is now empty
-				return i;
-			} else {
-				// Move onto the next node, freeing the old head
-				struct QueueBufferNode *temp = qbuf->head->next;
-				free(qbuf->head);
-				qbuf->head = temp;
-			}
-		}
-
-		cbuffer[i] = qbuf->head->front;
-		++qbuf->head->front;
-	}
-
-	return i;
-}
-
-int qb_getSize(struct QueueBuffer *qbuf) {
-	
+void generateError(const char *str) {
+	error = 1;
+	strncpy(error_str, str, UART_ERRSIZE);
 }
 
