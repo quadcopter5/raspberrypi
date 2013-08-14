@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -g
 
-all: gpio_bare.x uart_bare.x twoway.x i2c.x
+all: gpio_bare.x uart_bare.x twoway.x i2c.x i2c_control.x
 
 gpio_bare.x: gpio_bare.c
 	$(CC) $(CFLAGS) gpio_bare.c -o gpio_bare.x
@@ -14,6 +14,9 @@ twoway.x: twoway.c
 
 i2c.x: i2c.c
 	$(CC) $(CFLAGS) i2c.c -o i2c.x
+
+i2c_control.x: i2c_control.c
+	$(CC) $(CFLAGS) i2c_control.c -o i2c_control.x
 
 clean:
 	rm -f *.o *.x

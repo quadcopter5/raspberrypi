@@ -1,0 +1,19 @@
+
+ EMAX Servo ES08A
+------------------
+   PWM Frequency: 50Hz (2ms)
+	PWM PRE_SCALE: 121 (0x79)
+
+	Low:  HIGH for 225 / 4096
+	Mid:  HIGH for 307 / 4096
+	High: HIGH for 389 / 4096
+
+ Hitec Servo HS-485HB
+----------------------
+	PWM Frequency: 50Hz (2ms)
+	PWM PRE_SCALE: 121 (0x79)
+
+	Low:  HIGH for 122 / 4096
+	Mid:  HIGH for 307 / 4096
+	High: HIGH for 530 / 4096
+
