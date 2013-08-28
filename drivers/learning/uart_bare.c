@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 	uint32_t fbaudval = *fbaud;
 	printf("UART baud divisor value: 0x%04X.%04X\n", ibaudval, fbaudval);
 
-	*ibaud = 0x00000030; // 9600 baud
+	*ibaud = 0x00000008; // 57600 baud
 	*fbaud = 0x00000000;
 	printf("UART baud rate set\n");
 
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 #define WL8  0x60  // Word length 8-bits
 #define SPS  0x80  // Stick parity select
 	uint32_t *lcrh = (uint32_t *)(uart_base + UART_OFFSET_LCRH);
-	uint32_t lcrhval = FEN | WL8;
+	uint32_t lcrhval = FEN | PEN | EPS | WL8;
 	*lcrh = lcrhval;
 
 	printf("UART line control settings set\n");

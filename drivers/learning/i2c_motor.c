@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Set initial PWM load (1.5 ms)
-	float time_high = 1.5f; // Amount of time in HIGH voltage, in ms
+	float time_high = 0.0f; // Amount of time in HIGH voltage, in ms
 	uint16_t offcount = (int)((time_high / 20.0f) * 4096.0f);
 
 	bufsize = 5;
@@ -175,13 +175,13 @@ int main(int argc, char **argv) {
 				case 66:
 					// Down arrow key
 					time_high -= delta;
-					if (time_high < 0.6f)
-						time_high = 0.6f;
+					if (time_high < 0.0f)
+						time_high = 0.0f;
 					break;
 
 				case 67:
 					// Right arrow key
-					delta += 0.01f;
+					delta += 0.001f;
 					if (delta > 2.0f)
 						delta = 2.0f;
 					printf("Delta set to %.3f\n", delta);
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
 
 				case 68:
 					// Left arrow key
-					delta -= 0.01f;
+					delta -= 0.001f;
 					if (delta < 0.0f)
 						delta = 0.0f;
 					printf("Delta set to %.3f\n", delta);

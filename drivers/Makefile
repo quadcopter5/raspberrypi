@@ -51,21 +51,21 @@ $(OBJDIR)/queuebuffer_d.o: queuebuffer.c queuebuffer.h
 
 # Tests
 
-$(BINDIR)/test_gpio.x: $(OBJDIR)/test_gpio.o $(OBJDIR)/gpio.o
-	$(CC) $(OBJDIR)/test_gpio.o $(OBJDIR)/gpio.o -o $(BINDIR)/test_gpio.x
+$(BINDIR)/test_gpio.x: $(OBJDIR)/test_gpio.o $(OBJDIR)/gpio_d.o
+	$(CC) $(OBJDIR)/test_gpio.o $(OBJDIR)/gpio_d.o -o $(BINDIR)/test_gpio.x
 
 $(OBJDIR)/test_gpio.o: test_gpio.c gpio.h
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) -c test_gpio.c -o $(OBJDIR)/test_gpio.o
 
-$(BINDIR)/test_uart.x: $(OBJDIR)/test_uart.o $(OBJDIR)/uart.o $(OBJDIR)/queuebuffer.o
-	$(CC) $(OBJDIR)/test_uart.o $(OBJDIR)/uart.o $(OBJDIR)/queuebuffer.o \
+$(BINDIR)/test_uart.x: $(OBJDIR)/test_uart.o $(OBJDIR)/uart_d.o $(OBJDIR)/queuebuffer_d.o
+	$(CC) $(OBJDIR)/test_uart.o $(OBJDIR)/uart_d.o $(OBJDIR)/queuebuffer_d.o \
 		-o $(BINDIR)/test_uart.x
 
 $(OBJDIR)/test_uart.o: test_uart.c uart.h
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) -c test_uart.c -o $(OBJDIR)/test_uart.o
 
-$(BINDIR)/test_queuebuffer.x: $(OBJDIR)/test_queuebuffer.o $(OBJDIR)/queuebuffer.o
-	$(CC) $(OBJDIR)/test_queuebuffer.o $(OBJDIR)/queuebuffer.o \
+$(BINDIR)/test_queuebuffer.x: $(OBJDIR)/test_queuebuffer.o $(OBJDIR)/queuebuffer_d.o
+	$(CC) $(OBJDIR)/test_queuebuffer.o $(OBJDIR)/queuebuffer_d.o \
 		-o $(BINDIR)/test_queuebuffer.x
 
 $(OBJDIR)/test_queuebuffer.o: test_queuebuffer.c queuebuffer.h

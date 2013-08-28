@@ -56,6 +56,24 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	printf("Attempting to read a UBE16...\n");
+	uint16_t number16;
+	if (uart_readUBE16(&number16))
+		printf("  Received: %d\n", number16);
+	else {
+		printf("  Not enough data to read\n");
+		printf("  Size of queue: %d\n", uart_getInputQueueSize());
+	}
+
+	printf("Attempting to read a UBE32...\n");
+	uint32_t number32;
+	if (uart_readUBE32(&number32))
+		printf("  Received: %d\n", number32);
+	else {
+		printf("  Not enough data to read\n");
+		printf("  Size of queue: %d\n", uart_getInputQueueSize());
+	}
+
 	/*
 	// Read whenever RX FIFO is not empty, until a ` is read
 	done = 0;
